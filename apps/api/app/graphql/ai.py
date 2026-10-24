@@ -1,5 +1,3 @@
-from typing import Optional
-
 import strawberry
 
 from app.ai.models import AIRequest
@@ -15,7 +13,7 @@ class AIResult:
 @strawberry.input
 class AIGenerateInput:
     prompt: str
-    system_prompt: Optional[str] = None
+    system_prompt: str | None = None
     temperature: float = 0.2
 
 
@@ -23,9 +21,7 @@ class AIGenerateInput:
 class AIQuery:
     @strawberry.field
     async def generate(self, input: AIGenerateInput) -> AIResult:
-        service = AIService()
-
-        result = await service.generate(
+        result = await AIService().generate(
             AIRequest(
                 prompt=input.prompt,
                 system_prompt=input.system_prompt,
@@ -33,7 +29,4 @@ class AIQuery:
             )
         )
 
-        return AIResult(
-            content=result.content,
-            model=result.model,
-        )
+        return AIResult(content=result.content, model=result.model)

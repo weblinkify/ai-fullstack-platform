@@ -1,11 +1,22 @@
-from typing import AsyncIterator, Optional
+from collections.abc import AsyncIterator
 
 from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from app.ai.demo import DemoAI
 from app.ai.exceptions import AIProviderError
 from app.ai.models import AIResponse
 from app.config import get_settings
+
+
+def _messages(
+    system_prompt: str,
+    user_prompt: str,
+) -> list[ChatCompletionMessageParam]:
+    return [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
 
 
 class AIClient:
@@ -15,20 +26,19 @@ class AIClient:
         self.mock_mode = settings.ai_mock_mode
         self.model = settings.ai_model
         self.demo = DemoAI()
-        self.client: Optional[AsyncOpenAI] = None
+        self.client: AsyncOpenAI | None = None
 
-        if self.mock_mode:
-            return
-
-        if settings.ai_base_url:
+        if not self.mock_mode:
             self.client = AsyncOpenAI(
                 api_key=settings.ai_api_key,
-                base_url=settings.ai_base_url,
+                base_url=settings.ai_base_url or None,
             )
-        else:
-            self.client = AsyncOpenAI(
-                api_key=settings.ai_api_key,
-            )
+
+    def _require_client(self) -> AsyncOpenAI:
+        if self.client is None:
+            raise AIProviderError("AI client is not configured")
+
+        return self.client
 
     async def generate(
         self,
@@ -46,46 +56,31 @@ class AIClient:
                 usage=demo_usage,
             )
 
-        if self.client is None:
-            raise AIProviderError("AI client is not configured")
+        client = self._require_client()
 
         try:
-            response = await self.client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-                ],
+                messages=_messages(system_prompt, user_prompt),
                 temperature=temperature,
             )
-
-            message = response.choices[0].message.content or ""
-
-            usage: Optional[dict[str, int]] = None
-
-            if response.usage:
-                usage = {
-                    "prompt_tokens": response.usage.prompt_tokens,
-                    "completion_tokens": response.usage.completion_tokens,
-                    "total_tokens": response.usage.total_tokens,
-                }
-
-            return AIResponse(
-                content=message,
-                model=self.model,
-                usage=usage,
-            )
-
         except Exception as exc:
-            raise AIProviderError(
-                "AI provider request failed"
-            ) from exc
+            raise AIProviderError("AI provider request failed") from exc
+
+        usage: dict[str, int] | None = None
+
+        if response.usage:
+            usage = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
+
+        return AIResponse(
+            content=response.choices[0].message.content or "",
+            model=self.model,
+            usage=usage,
+        )
 
     async def stream(
         self,
@@ -100,33 +95,24 @@ class AIClient:
 
             return
 
-        if self.client is None:
-            raise AIProviderError("AI client is not configured")
+        client = self._require_client()
 
         try:
-            completion_stream = await self.client.chat.completions.create(
+            completion_stream = await client.chat.completions.create(
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt,
-                    },
-                ],
+                messages=_messages(system_prompt, user_prompt),
                 temperature=temperature,
                 stream=True,
             )
 
             async for stream_chunk in completion_stream:
+                if not stream_chunk.choices:
+                    continue
+
                 chunk_content = stream_chunk.choices[0].delta.content
 
                 if chunk_content:
                     yield chunk_content
 
         except Exception as exc:
-            raise AIProviderError(
-                "AI streaming request failed"
-            ) from exc
+            raise AIProviderError("AI streaming request failed") from exc

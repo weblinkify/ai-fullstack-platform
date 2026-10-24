@@ -67,7 +67,7 @@ export function IdeaComposer({
             {idea.length} characters
           </span>
 
-          <button
+          <button type="button"
             onClick={onGenerate}
             disabled={loading}
             className="rounded-xl bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"

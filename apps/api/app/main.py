@@ -5,28 +5,27 @@ from fastapi.responses import StreamingResponse
 from app.ai.exceptions import AIProviderError
 from app.ai.models import AIRequest, AIResponse
 from app.ai.service import AIService
-from app.architecture_export import router as architecture_export_router
+from app.config import get_settings
 from app.projects.router import router as project_router
 
+settings = get_settings()
+
 app = FastAPI(
-    title="Nexora AI",
+    title=settings.app_name,
     description="AI-native full-stack application platform.",
     version="1.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://nexora-ai-native.netlify.app",
-    ],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(project_router)
-app.include_router(architecture_export_router)
+
 
 @app.get("/health")
 async def health() -> dict[str, str]:
@@ -36,8 +35,7 @@ async def health() -> dict[str, str]:
 @app.post("/api/ai/generate", response_model=AIResponse)
 async def generate_ai(request: AIRequest) -> AIResponse:
     try:
-        ai_service = AIService()
-        return await ai_service.generate(request)
+        return await AIService().generate(request)
     except AIProviderError as exc:
         raise HTTPException(
             status_code=502,
@@ -47,9 +45,7 @@ async def generate_ai(request: AIRequest) -> AIResponse:
 
 @app.post("/api/ai/stream")
 async def stream_ai(request: AIRequest) -> StreamingResponse:
-    ai_service = AIService()
-
     return StreamingResponse(
-        ai_service.stream(request),
+        AIService().stream(request),
         media_type="text/plain",
     )

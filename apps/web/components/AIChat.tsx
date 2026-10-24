@@ -2,13 +2,18 @@
 
 import { FormEvent, useState } from "react";
 
+import { API_URL } from "@/lib/api";
+
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const SUGGESTIONS = [
+  "Explain async Python",
+  "Design a REST API",
+  "Review my architecture",
+];
 
 export default function AIChat() {
   const [prompt, setPrompt] = useState("");
@@ -236,20 +241,13 @@ export default function AIChat() {
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        <Suggestion
-          text="Explain async Python"
-          onClick={() => setPrompt("Explain async Python")}
-        />
-
-        <Suggestion
-          text="Design a REST API"
-          onClick={() => setPrompt("Design a REST API")}
-        />
-
-        <Suggestion
-          text="Review my architecture"
-          onClick={() => setPrompt("Review my architecture")}
-        />
+        {SUGGESTIONS.map((suggestion) => (
+          <Suggestion
+            key={suggestion}
+            text={suggestion}
+            onClick={() => setPrompt(suggestion)}
+          />
+        ))}
       </div>
     </div>
   );

@@ -1,7 +1,5 @@
-import json
-
 from app.ai.client import AIClient
-from app.ai.exceptions import AIProviderError
+from app.ai.parsing import parse_model
 from app.projects.code_models import (
     CodeGenerationRequest,
     CodeGenerationResponse,
@@ -29,12 +27,8 @@ class CodeGeneratorService:
             temperature=0.2,
         )
 
-        try:
-            data = json.loads(response.content)
-
-            return CodeGenerationResponse.model_validate(data)
-
-        except Exception as exc:
-            raise AIProviderError(
-                "AI returned an invalid generated codebase"
-            ) from exc
+        return parse_model(
+            response.content,
+            CodeGenerationResponse,
+            "AI returned an invalid generated codebase",
+        )

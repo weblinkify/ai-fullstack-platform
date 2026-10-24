@@ -2,36 +2,28 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  ProjectResponse,
-  CodeGenerationResponse,
-} from "./types";
+import { postJson } from "@/lib/api";
 
-import { IdeaComposer } from "./components/IdeaComposer";
 import { ArchitectureLoading } from "./components/ArchitectureLoading";
 import { ArchitectureResult } from "./components/ArchitectureResult";
 import { CodeLoading } from "./components/CodeLoading";
 import { CodeWorkspace } from "./components/CodeWorkspace";
-
+import { IdeaComposer } from "./components/IdeaComposer";
 import { exportArchitecture } from "./lib/exportArchitecture";
+import { CodeGenerationResponse, ProjectResponse } from "./types";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const MIN_IDEA_LENGTH = 10;
+
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback;
+}
 
 export default function NewProjectPage() {
   const [idea, setIdea] = useState("");
-  const [project, setProject] =
-    useState<ProjectResponse | null>(null);
-
-  const [code, setCode] =
-    useState<CodeGenerationResponse | null>(null);
-
-  const [loadingArchitecture, setLoadingArchitecture] =
-    useState(false);
-
-  const [loadingCode, setLoadingCode] =
-    useState(false);
-
+  const [project, setProject] = useState<ProjectResponse | null>(null);
+  const [code, setCode] = useState<CodeGenerationResponse | null>(null);
+  const [loadingArchitecture, setLoadingArchitecture] = useState(false);
+  const [loadingCode, setLoadingCode] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -41,14 +33,16 @@ export default function NewProjectPage() {
   }, [loadingCode]);
 
   async function architectIdea() {
-    if (!idea.trim()) {
+    const trimmedIdea = idea.trim();
+
+    if (!trimmedIdea) {
       setError("Describe the application you want to build.");
       return;
     }
 
-    if (idea.trim().length < 10) {
+    if (trimmedIdea.length < MIN_IDEA_LENGTH) {
       setError(
-        "Describe your idea using at least 10 characters.",
+        `Describe your idea using at least ${MIN_IDEA_LENGTH} characters.`,
       );
       return;
     }
@@ -59,34 +53,16 @@ export default function NewProjectPage() {
     setCode(null);
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/projects/generate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            idea: idea.trim(),
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          extractError(data) ||
+      setProject(
+        await postJson<ProjectResponse>(
+          "/api/projects/generate",
+          { idea: trimmedIdea },
           "Unable to architect this idea.",
-        );
-      }
-
-      setProject(data);
+        ),
+      );
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to connect to the Nexora AI backend.",
+        errorMessage(error, "Unable to connect to the Nexora AI backend."),
       );
     } finally {
       setLoadingArchitecture(false);
@@ -100,45 +76,23 @@ export default function NewProjectPage() {
     setError("");
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/projects/code`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      setCode(
+        await postJson<CodeGenerationResponse>(
+          "/api/projects/code",
+          {
             idea: idea.trim(),
             architecture: project.architecture,
-          }),
-        },
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          extractError(data) ||
+          },
           "Unable to generate the application code.",
-        );
-      }
-
-      setCode(data);
+        ),
+      );
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to generate the application code.",
+        errorMessage(error, "Unable to generate the application code."),
       );
     } finally {
       setLoadingCode(false);
     }
-  }
-
-  function handleExportArchitecture() {
-    if (!project) return;
-
-    exportArchitecture(project);
   }
 
   function resetProject() {
@@ -160,9 +114,7 @@ export default function NewProjectPage() {
           />
         )}
 
-        {loadingArchitecture && (
-          <ArchitectureLoading />
-        )}
+        {loadingArchitecture && <ArchitectureLoading />}
 
         {project && !code && !loadingCode && (
           <ArchitectureResult
@@ -170,9 +122,7 @@ export default function NewProjectPage() {
             error={error}
             onGenerateCode={generateCode}
             onReset={resetProject}
-            onExportArchitecture={
-              handleExportArchitecture
-            }
+            onExportArchitecture={() => exportArchitecture(project)}
           />
         )}
 
@@ -190,21 +140,4 @@ export default function NewProjectPage() {
       </div>
     </main>
   );
-}
-
-function extractError(data: any): string {
-  if (!data) return "";
-
-  if (typeof data.detail === "string") {
-    return data.detail;
-  }
-
-  if (Array.isArray(data.detail)) {
-    return data.detail
-      .map((item: any) => item?.msg)
-      .filter(Boolean)
-      .join(", ");
-  }
-
-  return "";
 }

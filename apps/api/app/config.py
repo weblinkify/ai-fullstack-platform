@@ -1,7 +1,5 @@
 from functools import lru_cache
-from typing import Optional
 
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,10 +7,15 @@ class Settings(BaseSettings):
     app_name: str = "Nexora AI"
     environment: str = "development"
 
-    ai_api_key: str = Field(default="")
+    ai_api_key: str = ""
     ai_model: str = "local-mock"
-    ai_base_url: Optional[str] = None
+    ai_base_url: str | None = None
     ai_mock_mode: bool = False
+
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "https://nexora-ai-native.netlify.app",
+    ]
 
     model_config = SettingsConfigDict(
         env_file=".env",

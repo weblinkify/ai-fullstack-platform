@@ -1,30 +1,17 @@
+import { downloadFile, slugify } from "@/lib/download";
+
 import { CodeGenerationResponse } from "../types";
 
-export function downloadProject(
-  code: CodeGenerationResponse,
-) {
+export function downloadProject(code: CodeGenerationResponse) {
   const manifest = {
     project_name: code.project_name,
     summary: code.summary,
     files: code.files,
   };
 
-  const blob = new Blob(
-    [JSON.stringify(manifest, null, 2)],
-    {
-      type: "application/json",
-    },
+  downloadFile(
+    JSON.stringify(manifest, null, 2),
+    `${slugify(code.project_name, "nexora-project")}.json`,
+    "application/json",
   );
-
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-
-  anchor.href = url;
-  anchor.download = `${code.project_name}.json`;
-
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-
-  URL.revokeObjectURL(url);
 }

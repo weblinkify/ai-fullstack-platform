@@ -223,20 +223,14 @@ source .venv/bin/activate
 Install dependencies:
 
 ```bash
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-dev.txt
 ```
 
 ---
 
 ## 3. Environment Variables
 
-Create:
-
-```text
-apps/api/.env
-```
-
-Add:
+Copy `apps/api/.env.example` to `apps/api/.env` and fill in:
 
 ```env
 ENVIRONMENT=development
@@ -244,7 +238,11 @@ ENVIRONMENT=development
 AI_API_KEY=your_api_key
 AI_MODEL=your_model_name
 AI_BASE_URL=
+AI_MOCK_MODE=false
+CORS_ORIGINS=["http://localhost:3000"]
 ```
+
+Set `AI_MOCK_MODE=true` to run with the built-in demo responses and no API key.
 
 > Never commit your `.env` file or API keys to GitHub.
 

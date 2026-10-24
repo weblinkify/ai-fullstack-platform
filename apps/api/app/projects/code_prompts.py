@@ -1,3 +1,5 @@
+from app.projects.models import ProjectArchitecture
+
 CODE_GENERATION_SYSTEM_PROMPT = """
 You are Nexora AI's senior full-stack code generation engine.
 
@@ -36,7 +38,7 @@ Rules:
 
 def build_code_generation_prompt(
     idea: str,
-    architecture: dict,
+    architecture: ProjectArchitecture,
 ) -> str:
     return f"""
 Generate a full-stack starter application for this product:
@@ -45,7 +47,7 @@ Generate a full-stack starter application for this product:
 
 Architecture:
 
-{architecture}
+{architecture.model_dump_json(indent=2)}
 
 Return JSON with exactly this structure:
 

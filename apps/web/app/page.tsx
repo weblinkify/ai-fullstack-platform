@@ -1,11 +1,19 @@
-import AIChat from "../components/AIChat";
+import AIChat from "@/components/AIChat";
+import Footer from "@/components/Footer";
+
+const pipeline = [
+  { title: "Idea", description: "Describe" },
+  { title: "Architect", description: "Design" },
+  { title: "Build", description: "Generate" },
+  { title: "Review", description: "Validate" },
+  { title: "Deploy", description: "Ship" },
+];
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <div className="mx-auto flex max-w-7xl flex-col px-6 py-12">
         <section className="flex flex-1 flex-col items-center">
-
           <div className="w-full max-w-5xl">
             <AIChat />
           </div>
@@ -13,41 +21,18 @@ export default function Home() {
 
         <section className="mx-auto mt-16 w-full max-w-5xl">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-            <PipelineItem
-              number="01"
-              title="Idea"
-              description="Describe"
-            />
-
-            <PipelineItem
-              number="02"
-              title="Architect"
-              description="Design"
-            />
-
-            <PipelineItem
-              number="03"
-              title="Build"
-              description="Generate"
-            />
-
-            <PipelineItem
-              number="04"
-              title="Review"
-              description="Validate"
-            />
-
-            <PipelineItem
-              number="05"
-              title="Deploy"
-              description="Ship"
-            />
+            {pipeline.map((item, index) => (
+              <PipelineItem
+                key={item.title}
+                number={String(index + 1).padStart(2, "0")}
+                title={item.title}
+                description={item.description}
+              />
+            ))}
           </div>
         </section>
 
-        <footer className="mt-12 border-t border-white/5 pt-6 text-center text-xs text-white/20">
-          Nexora AI · Build intelligent applications. Ship them like software.
-        </footer>
+        <Footer />
       </div>
     </main>
   );

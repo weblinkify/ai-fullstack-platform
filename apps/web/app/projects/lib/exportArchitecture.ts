@@ -1,3 +1,5 @@
+import { downloadFile, slugify } from "@/lib/download";
+
 import { ProjectResponse } from "../types";
 
 export function exportArchitecture(
@@ -74,26 +76,9 @@ ${numberedList(project.implementation_plan)}
 Architecture generated from the original product requirements by Nexora AI.
 `;
 
-  const blob = new Blob([markdown], {
-    type: "text/markdown;charset=utf-8",
-  });
-
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-
-  const filename = project.title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  anchor.href = url;
-  anchor.download = `${
-    filename || "nexora-project"
-  }-architecture.md`;
-
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-
-  URL.revokeObjectURL(url);
+  downloadFile(
+    markdown,
+    `${slugify(project.title, "nexora-project")}-architecture.md`,
+    "text/markdown;charset=utf-8",
+  );
 }

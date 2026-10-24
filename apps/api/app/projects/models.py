@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel, Field
 
 
@@ -8,17 +6,17 @@ class ProjectRequest(BaseModel):
 
 
 class ProjectArchitecture(BaseModel):
-    frontend: List[str]
-    backend: List[str]
-    database: List[str]
-    infrastructure: List[str]
+    frontend: list[str]
+    backend: list[str]
+    database: list[str]
+    infrastructure: list[str]
 
 
 class ProjectResponse(BaseModel):
     title: str
     summary: str
-    features: List[str]
+    features: list[str]
     architecture: ProjectArchitecture
-    api: List[str]
-    database: List[str]
-    implementation_plan: List[str]
+    api: list[str]
+    database: list[str]
+    implementation_plan: list[str]

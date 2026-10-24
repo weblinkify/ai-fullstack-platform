@@ -23,7 +23,7 @@ export function ProjectCard({
         {description}
       </p>
 
-      <button className="mt-5 text-sm text-white/70 transition hover:text-white">
+      <button type="button" className="mt-5 text-sm text-white/70 transition hover:text-white">
         View project →
       </button>
     </div>

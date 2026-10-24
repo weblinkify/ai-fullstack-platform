@@ -37,14 +37,14 @@ export function ArchitectureResult({
         </div>
 
         <div className="flex gap-2">
-          <button
+          <button type="button"
             onClick={onExportArchitecture}
             className="rounded-xl border border-white/10 px-4 py-2 text-xs text-white/50 transition hover:bg-white/5 hover:text-white"
           >
             Export Architecture
           </button>
 
-          <button
+          <button type="button"
             onClick={onReset}
             className="rounded-xl border border-white/10 px-4 py-2 text-xs text-white/40 transition hover:bg-white/5"
           >
@@ -168,7 +168,7 @@ export function ArchitectureResult({
             </p>
           </div>
 
-          <button
+          <button type="button"
             onClick={onGenerateCode}
             className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-medium text-black transition hover:bg-white/90"
           >

@@ -1,6 +1,6 @@
-from typing import List
-
 from pydantic import BaseModel, Field
+
+from app.projects.models import ProjectArchitecture
 
 
 class GeneratedFile(BaseModel):
@@ -11,10 +11,10 @@ class GeneratedFile(BaseModel):
 
 class CodeGenerationRequest(BaseModel):
     idea: str = Field(min_length=10, max_length=5000)
-    architecture: dict
+    architecture: ProjectArchitecture
 
 
 class CodeGenerationResponse(BaseModel):
     project_name: str
     summary: str
-    files: List[GeneratedFile]
+    files: list[GeneratedFile]

@@ -1,6 +1,7 @@
+import Footer from "@/components/Footer";
+
 import { ActivityChart } from "./components/ActivityChart";
 import { AIPipeline } from "./components/AIPipeline";
-import { DashboardFooter } from "./components/DashboardFooter";
 import { DashboardHeader } from "./components/DashboardHeader";
 import { MetricsGrid } from "./components/MetricsGrid";
 import { RecentProjects } from "./components/RecentProjects";
@@ -20,7 +21,7 @@ export default function DashboardPage() {
 
         <RecentProjects />
 
-        <DashboardFooter />
+        <Footer />
       </div>
     </main>
   );
