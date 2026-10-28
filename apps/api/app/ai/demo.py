@@ -211,10 +211,7 @@ class DemoAI:
         ):
             return self._project_response(prompt)
 
-        if any(
-            word in prompt_lower
-            for word in ["fastapi", "backend", "api"]
-        ):
+        if any(word in prompt_lower for word in ["fastapi", "backend", "api"]):
             return (
                 "FastAPI is a strong choice for an AI backend because it "
                 "provides async request handling, automatic API documentation, "
@@ -225,8 +222,7 @@ class DemoAI:
             )
 
         if any(
-            word in prompt_lower
-            for word in ["next.js", "nextjs", "frontend", "react"]
+            word in prompt_lower for word in ["next.js", "nextjs", "frontend", "react"]
         ):
             return (
                 "Next.js provides the application layer for the Nexora AI "
@@ -236,10 +232,7 @@ class DemoAI:
                 "independently."
             )
 
-        if any(
-            word in prompt_lower
-            for word in ["investor", "startup", "business"]
-        ):
+        if any(word in prompt_lower for word in ["investor", "startup", "business"]):
             return (
                 "Nexora AI is an AI-native application platform designed with "
                 "a modular architecture.\n\n"
@@ -249,10 +242,7 @@ class DemoAI:
                 "and multiple AI providers."
             )
 
-        if any(
-            word in prompt_lower
-            for word in ["hello", "hi", "hey"]
-        ):
+        if any(word in prompt_lower for word in ["hello", "hi", "hey"]):
             return (
                 "Hello! I'm Nexora AI. I can help you explore the platform, "
                 "architecture, APIs, and AI-powered workflows."
